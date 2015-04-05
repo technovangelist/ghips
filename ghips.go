@@ -35,7 +35,7 @@ type allIssues struct {
 }
 
 func main() {
-  org := "datadog"
+  org := os.Getenv("GHIPS_ORG")
   personalAccessToken = os.Getenv("GITHUB_ACCESS_TOKEN")
 
   if len(personalAccessToken) == 0 {

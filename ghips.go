@@ -6,12 +6,14 @@ import (
   "golang.org/x/oauth2"
   "log"
   "os"
+  "strings"
   "time"
 )
 
 var (
   personalAccessToken string
   issuesCollection    allIssues
+  org                 string
 )
 
 type TokenSource struct {
@@ -35,9 +37,10 @@ type allIssues struct {
 }
 
 func main() {
-  org := os.Getenv("GHIPS_ORG")
+  org = os.Getenv("GHIPS_ORG")
   personalAccessToken = os.Getenv("GITHUB_ACCESS_TOKEN")
 
+  fmt.Println(org)
   if len(personalAccessToken) == 0 {
     log.Fatal("Before you can use this you must set the GITHUB_ACCESS_TOKEN environment variable.")
   }
@@ -120,16 +123,35 @@ func printIssues(issues []github.Issue, title string) {
   fmt.Printf("  %s\n", title)
   for _, issue := range issues {
     var title string
-    if len(*issue.Title) > 70 {
-      title = (*issue.Title)[:69] + "..."
+    if len(*issue.Title) > 60 {
+      title = (*issue.Title)[:59] + "..."
     } else {
       title = *issue.Title
     }
-    fmt.Printf("  - %s (%s) - %s\n", title, issue.UpdatedAt.Format("02-01-06"), (*issue.URL)[37:])
+    getRepoName(issue)
+
+    fmt.Printf("  %-23s %-19s %-2s(%5d) %-62s (%s)\n", getRepoName(issue), *issue.User.Login, attentionStatus(issue), *issue.Number, title, issue.UpdatedAt.Format("02-01-06"))
   }
   fmt.Printf("\n")
 }
 
+func attentionStatus(issue github.Issue) (attention_status string) {
+  attention_status = ""
+  if *issue.Comments == 0 && issue.CreatedAt.Before(time.Now().Add(time.Hour*24*2*-1)) {
+    attention_status = "**"
+  }
+
+  return
+}
+func getRepoName(issue github.Issue) string {
+  url := *issue.URL
+  // fmt.Println(url)
+  // fmt.Println(url[30+len(org):])
+  // fmt.Println(url[:strings.LastIndex(url, "issues")])
+  // fmt.Println(url[30+len(org)])
+  repo := (url)[30+len(org) : strings.LastIndex(url, "issues")-1]
+  return repo
+}
 func isUserAnOrgMember(thisuser github.User) bool {
   for _, user := range issuesCollection.users {
     if *thisuser.Login == *user.Login {

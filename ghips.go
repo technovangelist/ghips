@@ -40,7 +40,6 @@ func main() {
   org = os.Getenv("GHIPS_ORG")
   personalAccessToken = os.Getenv("GITHUB_ACCESS_TOKEN")
 
-  fmt.Println(org)
   if len(personalAccessToken) == 0 {
     log.Fatal("Before you can use this you must set the GITHUB_ACCESS_TOKEN environment variable.")
   }
@@ -130,7 +129,7 @@ func printIssues(issues []github.Issue, title string) {
     }
     getRepoName(issue)
 
-    fmt.Printf("  %-23s %-19s %-2s(%5d) %-62s (%s)\n", getRepoName(issue), *issue.User.Login, attentionStatus(issue), *issue.Number, title, issue.UpdatedAt.Format("02-01-06"))
+    fmt.Printf("   %-23s %-19s %-2s(%5d) %-62s (%s)\n", getRepoName(issue), *issue.User.Login, attentionStatus(issue), *issue.Number, title, issue.UpdatedAt.Format("02-01-06"))
   }
   fmt.Printf("\n")
 }

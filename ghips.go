@@ -93,7 +93,7 @@ func main() {
   }
 
   fmt.Printf("\nSummary\n")
-  fmt.Printf("\nPull Requests - %d\n", totalPR)
+  fmt.Printf("\n\nPull Requests - %d\n", totalPR)
   fmt.Printf("\n  Employee Pull Requests")
   fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d", len(issuesCollection.pr_new_orgmember), len(issuesCollection.pr_2m_orgmember), len(issuesCollection.pr_6m_orgmember), len(issuesCollection.pr_1y_orgmember))
   fmt.Printf("\n\n  Public Pull Requests")
@@ -105,7 +105,7 @@ func main() {
   fmt.Printf("\n\n  Public Issues")
   fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d\n", len(issuesCollection.issues_new_public), len(issuesCollection.issues_2m_public), len(issuesCollection.issues_6m_public), len(issuesCollection.issues_1y_public))
 
-  fmt.Printf("\n\nPublic Details - Pull Requests\n")
+  fmt.Printf("\nPublic Details - Pull Requests\n")
   printIssues(issuesCollection.pr_1y_public, "1+ year old pull requests")
   printIssues(issuesCollection.pr_6m_public, "6-12 month old pull requests")
   printIssues(issuesCollection.pr_2m_public, "2-6 month old pull requests")
@@ -116,6 +116,7 @@ func main() {
   printIssues(issuesCollection.issues_6m_public, "6-12 month old issues")
   printIssues(issuesCollection.issues_2m_public, "2-6 month old issues")
   printIssues(issuesCollection.issues_new_public, "New Issues")
+  fmt.Printf("(** indicates that issue or pr is older than 2 days with no comments. ## indicates that issue or pr has no comments in 4 weeks)\n\n")
 }
 
 func printIssues(issues []github.Issue, title string) {
@@ -129,7 +130,7 @@ func printIssues(issues []github.Issue, title string) {
     }
     getRepoName(issue)
 
-    fmt.Printf("   %-23s %-19s %-2s(%5d) %-62s (%s)\n", getRepoName(issue), *issue.User.Login, attentionStatus(issue), *issue.Number, title, issue.UpdatedAt.Format("02-01-06"))
+    fmt.Printf("   %-23s %-19s %4s(%5d) %-62s %s\n", getRepoName(issue), *issue.User.Login, attentionStatus(issue), *issue.Number, title, issue.CreatedAt.Format("Jan 2, 2006"))
   }
   fmt.Printf("\n")
 }
@@ -138,6 +139,9 @@ func attentionStatus(issue github.Issue) (attention_status string) {
   attention_status = ""
   if *issue.Comments == 0 && issue.CreatedAt.Before(time.Now().Add(time.Hour*24*2*-1)) {
     attention_status = "**"
+  }
+  if issue.UpdatedAt.Before(time.Now().Add(time.Hour * 24 * 30 * -1)) {
+    attention_status += "##"
   }
 
   return
